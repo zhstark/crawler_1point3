@@ -15,7 +15,7 @@ class Crawler1Point3Pipeline:
 
     company_list = {
         'Facebook': 0, 'Google': 0, 'Apple': 0, 'Airbnb': 0, 'Amazon': 0,
-        'Tiktok': 0
+        'Tiktok': 0, 'Other': 0
     }
 
     file_name = 'item.md'
@@ -30,7 +30,7 @@ class Crawler1Point3Pipeline:
         self.today = datetime.datetime.today()
 
     def close_spider(self, spider):
-        self.writeMarkdown()
+        self.write_markdown()
       #  json.dump(self.company_list, self.json_file_w)
         self.file.close()
         os.popen(self.cmd)
@@ -39,23 +39,19 @@ class Crawler1Point3Pipeline:
         # process new data
         adapter = ItemAdapter(item)
 
-        # only process those have company
+        # only process those have company label
         if 'company' in adapter:
             company = adapter.get('company')
             date = adapter.get('date')
-            if company in self.company_list:
-                # check if the date is too old
-                if re.match(self.date_exp, date):
-                    date = datetime.datetime.strptime(date, "%Y-%m-%d")
-                    date_low_boundary = self.today - datetime.timedelta(days=self.date_range)
-                    if date < date_low_boundary:
-                        return item
 
-                self.company_list[company] += 1
-
+            if self.in_time_range(date):
+                if company in self.company_list:
+                    self.company_list[company] += 1
+                else:
+                    self.company_list['Other'] += 1
         return item
 
-    def writeMarkdown(self):
+    def write_markdown(self):
         unit = '| ---- '
         name_list = ""
         num_list = ""
@@ -70,3 +66,12 @@ class Crawler1Point3Pipeline:
         self.file.write(name_list)
         self.file.write(head)
         self.file.write(num_list)
+
+    def in_time_range(self, date):
+        if re.match(self.date_exp, date):
+            date = datetime.datetime.strptime(date, "%Y-%m-%d")
+            date_low_boundary = self.today - datetime.timedelta(days=self.date_range)
+            if date < date_low_boundary:
+                return False
+        
+        return True
