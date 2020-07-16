@@ -4,6 +4,13 @@ from crawler_1point3.items import Crawler1Point3Item
 class Spider1point3(scrapy.Spider):
     name = "Spider1point3"
 
+    path_to_post = ['div.wp div.boardnav div.mn div.tl div.bm_c', '//table[@id="threadlisttableid"]', 'tbody']
+    # new post vs no-new-reply post
+    path_to_th = ['th.new', 'th.common']
+    path_to_title = 'a.s::text'
+    path_to_company = 'span span u b font::text'
+    path_to_time = 'td.by em span::text'
+
     def start_requests(self):
         url_frame=['https://www.1point3acres.com/bbs/forum-28-', '.html']
 
@@ -17,30 +24,24 @@ class Spider1point3(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        path_to_post = ['div.wp div.boardnav div.mn div.tl div.bm_c', '//table[@id="threadlisttableid"]', 'tbody']
-        # new post vs no-new-reply post
-        path_to_th = ['th.new', 'th.common']
-        path_to_title = 'a.s::text'
-        path_to_company = 'span span u b font::text'
-        path_to_time = 'td.by em span::text'
-
         self.log('I am parsing')
-        for post in response.css(path_to_post[0]).xpath(path_to_post[1]).css(path_to_post[2]):
+
+        for post in response.css(self.path_to_post[0]).xpath(self.path_to_post[1]).css(self.path_to_post[2]):
             
             item = Crawler1Point3Item()
-            th = post.css(path_to_th[0])
+            th = post.css(self.path_to_th[0])
             if th == []:
-                th = post.css(path_to_th[1])
+                th = post.css(self.path_to_th[1])
             if th == []:
                 continue
 
             # get company at index 1 e.g: [ full-time, Google]
-            job_company = th.css(path_to_company).getall()
+            job_company = th.css(self.path_to_company).getall()
             # get post title
-            title = th.css(path_to_title).get()
+            title = th.css(self.path_to_title).get()
 
             # get create time at index 0
-            time = post.css(path_to_time).getall()
+            time = post.css(self.path_to_time).getall()
 
             # may not have company
             if len(job_company) > 1:

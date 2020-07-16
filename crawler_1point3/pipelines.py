@@ -9,6 +9,7 @@ from itemadapter import ItemAdapter
 import os
 import json
 import datetime
+import re
 
 class Crawler1Point3Pipeline:
 
@@ -18,11 +19,15 @@ class Crawler1Point3Pipeline:
     }
 
     file_name = 'item.md'
+    date_exp = r'[0-9]*\-[0-9]*\-[0-9]*'
+    # time range of post, unit: day
+    date_range = 10
 
     cmd = "pandoc " + file_name + " -f markdown -t html -s -o item.html"
 
     def open_spider(self, spider):
         self.file = open('item.md', 'w')
+        self.today = datetime.datetime.today()
 
     def close_spider(self, spider):
         self.writeMarkdown()
@@ -36,9 +41,17 @@ class Crawler1Point3Pipeline:
 
         # only process those have company
         if 'company' in adapter:
-            data = adapter.get('company')
-            if data in self.company_list:
-                self.company_list[data] += 1
+            company = adapter.get('company')
+            date = adapter.get('date')
+            if company in self.company_list:
+                # check if the date is too old
+                if re.match(self.date_exp, date):
+                    date = datetime.datetime.strptime(date, "%Y-%m-%d")
+                    date_low_boundary = self.today - datetime.timedelta(days=self.date_range)
+                    if date < date_low_boundary:
+                        return item
+
+                self.company_list[company] += 1
 
         return item
 
