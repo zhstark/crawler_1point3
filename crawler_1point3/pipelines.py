@@ -8,6 +8,7 @@
 from itemadapter import ItemAdapter
 import os
 import json
+import datetime
 
 class Crawler1Point3Pipeline:
 
@@ -21,33 +22,24 @@ class Crawler1Point3Pipeline:
     cmd = "pandoc " + file_name + " -f markdown -t html -s -o item.html"
 
     def open_spider(self, spider):
-        self.json_file_w = open('item.json', 'w')
-        self.json_file_r = open('item.json', 'r')
         self.file = open('item.md', 'w')
-
-        # read old data
-        old_data = self.json_file_r.read()
-        if old_data != "":
-            old_data=json.loads(old_data)
-            for k, v in old_data.items():
-                self.company_list[k]+=int(v)
-                
-        print('I get old data: ' + json.dumps(self.company_list))
 
     def close_spider(self, spider):
         self.writeMarkdown()
-        json.dump(self.company_list, self.json_file_w)
+      #  json.dump(self.company_list, self.json_file_w)
         self.file.close()
-        self.json_file_w.close()
-        self.json_file_r.close()
         os.popen(self.cmd)
 
     def process_item(self, item, spider):
         # process new data
         adapter = ItemAdapter(item)
-        data = adapter.get('company')
-        if data in self.company_list:
-            self.company_list[data] += 1
+
+        # only process those have company
+        if 'company' in adapter:
+            data = adapter.get('company')
+            if data in self.company_list:
+                self.company_list[data] += 1
+
         return item
 
     def writeMarkdown(self):
