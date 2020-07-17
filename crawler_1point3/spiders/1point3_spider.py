@@ -15,7 +15,7 @@ class Spider1point3(scrapy.Spider):
         url_frame=['https://www.1point3acres.com/bbs/forum-28-', '.html']
 
         # how many pages want to scrape
-        last_page=10
+        last_page=1
         urls = []
         for i in range(1, last_page+1):
             urls.append(url_frame[0]+str(i)+url_frame[1])
