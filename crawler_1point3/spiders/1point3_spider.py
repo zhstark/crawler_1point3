@@ -15,7 +15,7 @@ class Spider1point3(scrapy.Spider):
         url_frame=['https://www.1point3acres.com/bbs/forum-28-', '.html']
 
         # how many pages want to scrape
-        last_page=1
+        last_page=10
         urls = []
         for i in range(1, last_page+1):
             urls.append(url_frame[0]+str(i)+url_frame[1])
@@ -48,5 +48,5 @@ class Spider1point3(scrapy.Spider):
                 item["company"] = job_company[1]
 
             item["title"] = title
-            item["date"] =  time[0]
+            item["create_date"] =  time[0]
             yield item

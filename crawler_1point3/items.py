@@ -10,5 +10,7 @@ class Crawler1Point3Item(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     title = scrapy.Field()
-    company=scrapy.Field()
-    date = scrapy.Field()
+    company = scrapy.Field()
+    author = scrapy.Field()
+    create_date = scrapy.Field()
+    newest_reply_date = scrapy.Field()

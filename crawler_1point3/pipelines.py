@@ -42,7 +42,7 @@ class Crawler1Point3Pipeline:
         # only process those have company label
         if 'company' in adapter:
             company = adapter.get('company')
-            date = adapter.get('date')
+            date = adapter.get('create_date')
 
             if self.in_time_range(date):
                 if company in self.company_list:
