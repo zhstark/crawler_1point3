@@ -1,8 +1,14 @@
 统计一亩三分地帖子数据
 
-## 使用说明
+## Prerequisite
 
-下载 scrapy
+安装 python 包： 
+- scrapy
+- pymongo
+
+安装、启动 MongoDB
+
+## 使用说明
 
 运行：
 

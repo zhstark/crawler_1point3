@@ -12,6 +12,13 @@ BOT_NAME = 'crawler_1point3'
 SPIDER_MODULES = ['crawler_1point3.spiders']
 NEWSPIDER_MODULE = 'crawler_1point3.spiders'
 
+# MongoDB url
+MONGO_URI = 'mongodb://localhost:27017/'
+# MongoDB database
+MONGO_DATABASE = 'cralwer_1point3'
+
+# the time range of posts need to be scraped, unit: day
+DATE_RANGE = 10
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawler_1point3 (+http://www.yourdomain.com)'
