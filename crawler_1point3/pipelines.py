@@ -1,5 +1,5 @@
 # Define your item pipelines here
-#
+# All posts are delivered to this pipeline as items.
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
@@ -11,6 +11,7 @@ import json
 import datetime
 import re
 import pymongo
+import logging
 
 
 class Crawler1Point3Pipeline:
@@ -19,14 +20,10 @@ class Crawler1Point3Pipeline:
         'Facebook': 0, 'Google': 0, 'Apple': 0, 'Airbnb': 0, 'Amazon': 0,
         'Tiktok': 0, 'Other': 0
     }
-
-    file_name = 'item.md'
-    date_exp = r'[0-9]*\-[0-9]*\-[0-9]*'
+    
     collection_name = 'posts'
-    # # time range of post, unit: day
-    # date_range = 10
 
-    cmd = "pandoc " + file_name + " -f markdown -t html -s -o item.html"
+    cmd = "pandoc data.md -f markdown -t html -s -o item.html"
 
     def __init__(self, mongo_uri="", mongo_db="", date_range=""):
         self.mongo_uri = mongo_uri
@@ -46,109 +43,92 @@ class Crawler1Point3Pipeline:
         """
         when a spider begins to work, open a file to write the scraped data and get the current time.
         """
-        self.file = open('item.md', 'w')
         self.client = pymongo.MongoClient(self.mongo_uri)
         self.db = self.client[self.mongo_db]
 
     def close_spider(self, spider):
         """
-        when a spider finishs its work, write all scraped data and close the file
+        when a spider finishs its work, 
+        1. record work date in collection spider_work_date
+        2. write all scraped data and close the file
         """
-        self.write_markdown()
-      #  json.dump(self.company_list, self.json_file_w)
-        self.file.close()
+        collection = self.db['spider_work_date']
+        collection.insert_one({'date': self.today.strftime('%Y-%m-%d') })
+        self.create_forms_by_db()
         os.popen(self.cmd)
-
         self.client.close()
 
     def process_item(self, item, spider):
+        """
+        given an item of post, this function:
+        1. for each post, get rid of 'last_reply_date' key to see if this post has been stored before
+        2. update/insert the post
+        """
         adapter = ItemAdapter(item)
-        # make date format be %Y-%m-%d
-        adapter['create_date'] = self.get_create_date(adapter['create_date'])
-        # only process those have company label
-        if 'company' in adapter:
-            company = adapter.get('company')
-            date = adapter.get('create_date')
-
-            if self.in_time_range(date):
-                if company in self.company_list:
-                    self.company_list[company] += 1
-                else:
-                    self.company_list['Other'] += 1
-
         post = adapter.asdict()
+        # get rid of ‘last_reply_date’ key
+        last_reply_date = ''
+        if 'last_reply_date' in post:
+            last_reply_date = post['last_reply_date']
+            post.pop('last_reply_date')
         db_collection = self.db[self.collection_name]
-        # if this post is new
+        #logging.debug("search for post: \n %s", post)
+        # if this post is new, insert the origin post
         if db_collection.count_documents(post) == 0:
-            print("GOING TO INSERT")
-            db_collection.insert_one(post)
+            logging.debug("Insert a new item")
+            db_collection.insert_one(adapter.asdict())
+        # this post has been stored before, update 
+        else:
+            if last_reply_date != '':
+                logging.debug("Updating an item %s", last_reply_date)
+                db_collection.update_one(post, { "$set": { "last_reply_date": last_reply_date } })
         
-        #self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
         return item
 
-    def write_markdown(self):
+    def write_markdown(self, f, dic):
+        """
+        :param f: the file that you want to write
+        :param dic: a dictionary where the data comes from
+        """
         unit = '| ---- '
         name_list = ""
         num_list = ""
         head = ""
-        for name, num in self.company_list.items():
+        for name, num in dic.items():
             head += unit
             name_list += "| " + name + " "
             num_list += "| " + str(num) + " "
         name_list += '|\n'
         num_list += '|\n'
         head += '|\n'
-        self.file.write(name_list)
-        self.file.write(head)
-        self.file.write(num_list)
+        f.write(name_list)
+        f.write(head)
+        f.write(num_list)
 
-    def in_time_range(self, date):
-        if re.match(self.date_exp, date):
-            date = datetime.datetime.strptime(date, "%Y-%m-%d")
-            date_low_boundary = self.today - datetime.timedelta(days=self.date_range)
-            if date < date_low_boundary:
-                return False
-        
-        return True
 
-    def get_create_date(self, time):
+
+    def create_forms_by_db(self):
         """
-        process time with format like '5 天前' to date format like '2020-3-3'
-        
-        :return: string with format %Y-%m-%d
+        create forms according to the data in database
         """
-        # if empty, return empty
-        if time == "":
-            return ""
-        # already in good format
-        if re.match(self.date_exp, time):
-            return time
-        
-        # others like:  "5 天前", "昨天 06:16", "5 小时前", "前天 05:23", "5 分钟前", 
-        time = time.split('\xa0')
-        if len(time) == 2:
-            if self.is_number(time[0]):
-                num = int(time[0])
-                unit = time[1][:-1]
-                if unit == "天":
-                    return (self.today - datetime.timedelta(days=num)).strftime('%Y-%m-%d')
-                elif unit == "小时":
-                    return (self.today - datetime.timedelta(hours=num)).strftime('%Y-%m-%d')
-                else:
-                    return self.today.strftime('%Y-%m-%d')
-            elif time[0] == "昨天":
-                return (self.today - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-            elif time[0] == "前天":
-                return (self.today - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-        
-        # unknow format
-        return time
+        f = open('data.md', 'w')
+        db_collection = self.db[self.collection_name]
+        for delta in range(0, self.date_range+1):
+            date = (self.today - datetime.timedelta(days=delta)).strftime('%Y-%m-%d')
+            s = "## Date: "+ date + '\n'
+            f.write(s)
+            f.write('\n')
+            table = {}
+            for company in self.company_list.keys():
+                posts = {'company': company, 'create_date': date}
+                count = db_collection.count_documents(posts)
+                self.company_list[company] += count
+                table[company] = count
+            self.write_markdown(f, table)
+            f.write('\n')
+            f.write('\n')
 
-    def is_number(self, s):
-        try:
-            float(s)
-            return True
-        except ValueError:
-            pass
-        
-        return False
+        f.write("## Recent 10 days: \n")
+        self.write_markdown(f, self.company_list)
+        f.close()
+

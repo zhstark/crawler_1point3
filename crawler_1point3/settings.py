@@ -17,8 +17,11 @@ MONGO_URI = 'mongodb://localhost:27017/'
 # MongoDB database
 MONGO_DATABASE = 'cralwer_1point3'
 
+# how many pages will scrape
+PAGE_RANGE = 10
+
 # the time range of posts need to be scraped, unit: day
-DATE_RANGE = 10
+DATE_RANGE = 7
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawler_1point3 (+http://www.yourdomain.com)'

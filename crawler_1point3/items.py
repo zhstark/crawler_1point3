@@ -13,4 +13,4 @@ class Crawler1Point3Item(scrapy.Item):
     company = scrapy.Field()
     author = scrapy.Field()
     create_date = scrapy.Field()
-    newest_reply_date = scrapy.Field()
+    last_reply_date = scrapy.Field()
