@@ -13,7 +13,7 @@
 运行：
 
 ```
-$ scrapy crawl Spider1point3 
+$ scrapy crawl Spider1point3 --logfile ./spider.log
 ```
 
 ## 数据库

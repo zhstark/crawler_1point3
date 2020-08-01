@@ -48,7 +48,6 @@ class Spider1point3(scrapy.Spider):
             create_date: string, %Y-%m-%d
             last_reply_date: string, %Y-%m-%d
         and pass the item to pipeline
-
         in order to not do duplicated work, if current post date is eailer than the last work date, set self.reach_last true
         """
         self.logger.debug('parsing')

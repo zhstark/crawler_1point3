@@ -15,15 +15,8 @@ import logging
 
 
 class Crawler1Point3Pipeline:
-
-    company_list = {
-        'Facebook': 0, 'Google': 0, 'Apple': 0, 'Airbnb': 0, 'Amazon': 0,
-        'Tiktok': 0, 'Other': 0
-    }
     
     collection_name = 'posts'
-
-    cmd = "pandoc data.md -f markdown -t html -s -o item.html"
 
     def __init__(self, mongo_uri="", mongo_db="", date_range=""):
         self.mongo_uri = mongo_uri
@@ -55,7 +48,6 @@ class Crawler1Point3Pipeline:
         collection = self.db['spider_work_date']
         collection.insert_one({'date': self.today.strftime('%Y-%m-%d') })
         self.create_forms_by_db()
-        os.popen(self.cmd)
         self.client.close()
 
     def process_item(self, item, spider):
