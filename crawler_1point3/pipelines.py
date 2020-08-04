@@ -18,6 +18,9 @@ class Crawler1Point3Pipeline:
     
     collection_name = 'posts'
 
+    # used for local test
+    company_list = {"Apple": 0, "Facebook": 0, "Google": 0}
+
     def __init__(self, mongo_uri="", mongo_db="", date_range=""):
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
@@ -47,7 +50,7 @@ class Crawler1Point3Pipeline:
         """
         collection = self.db['spider_work_date']
         collection.insert_one({'date': self.today.strftime('%Y-%m-%d') })
-        self.create_forms_by_db()
+        # self.create_forms_by_db()
         self.client.close()
 
     def process_item(self, item, spider):
@@ -98,7 +101,7 @@ class Crawler1Point3Pipeline:
         f.write(num_list)
 
 
-
+    # used for test
     def create_forms_by_db(self):
         """
         create forms according to the data in database
