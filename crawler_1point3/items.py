@@ -17,6 +17,7 @@ class Crawler1Point3Item(scrapy.Item):
     create_date = scrapy.Field()
     last_reply_date = scrapy.Field()
 
+    # extra info for interview posts
     position = scrapy.Field()
     interview_type = scrapy.Field()
     apply_method = scrapy.Field()

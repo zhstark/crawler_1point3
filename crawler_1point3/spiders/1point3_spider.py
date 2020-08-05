@@ -7,14 +7,16 @@ from crawler_1point3.items import Crawler1Point3Item
 
 class Spider1point3(scrapy.Spider):
     name = "Spider1point3"
-    reach_last = False
+    jobs_reach_last = False
+    interviews_reach_last = False
     date_exp = r'[0-9]*\-[0-9]*\-[0-9]*'
-    url_frame = ['https://www.1point3acres.com/bbs/forum-28-', '.html']
-    page_number = 1
+    path_to_post = ['div.wp div.boardnav div.mn div.tl div.bm_c', '//table[@id="threadlisttableid"]/tbody[contains(@id, "normalthread")]']
+    jobs_page_number = 1
+    interviews_page_number = 1
 
     def __init__(self, mongo_uri='mongodb://localhost:27017/', mongo_db='cralwer_1point3', page_range=10):
         """
-        access the database to get the last work date from collection 'spider_work_date', if no such collection, default 10 years ago.
+            access the database to get the last work date from collection 'spider_work_date', if no such collection, default 10 years ago.
         """
         self.page_range = page_range
         client = pymongo.MongoClient(mongo_uri)
@@ -31,6 +33,10 @@ class Spider1point3(scrapy.Spider):
 
     @classmethod
     def from_crawler(cls, crawler):
+        """
+            get setting configuration
+            return to instance initialization
+        """
         mongo_uri=crawler.settings.get('MONGO_URI')
         mongo_db=crawler.settings.get('MONGO_DATABASE', 'cralwer_1point3')
         page_range = crawler.settings.get('PAGE_RANGE', 10)
@@ -40,7 +46,7 @@ class Spider1point3(scrapy.Spider):
         jobs_url = "https://www.1point3acres.com/bbs/forum-28-1.html"
         interviews_url = "https://www.1point3acres.com/bbs/forum-145-1.html"
         yield scrapy.Request(jobs_url, self.parse_for_jobs_post)
-        #yield scrapy.Request(interviews_url, self.parse_for_jobs_post)
+        yield scrapy.Request(interviews_url, self.parse_for_interviews_post)
 
     def parse_for_jobs_post(self, response):
         """
@@ -53,25 +59,42 @@ class Spider1point3(scrapy.Spider):
             and pass the item to pipeline
             in order to not do duplicated work, if current post date is eailer than the last work date, set self.reach_last true
         """
-        self.logger.debug('parsing posts of jobs')
-        self.logger.debug('Current page number is %d', self.page_number)
-        path_to_post = ['div.wp div.boardnav div.mn div.tl div.bm_c', '//table[@id="threadlisttableid"]/tbody[contains(@id, "normalthread")]']
-
-        for post in response.css(path_to_post[0]).xpath(path_to_post[1]):
+        self.logger.debug('Currently parsing jobs page, page number is %d', self.jobs_page_number)
+        url_frame = ['https://www.1point3acres.com/bbs/forum-28-', '.html']
+        # parsing current page
+        for post in response.css(self.path_to_post[0]).xpath(self.path_to_post[1]):
             item = self.extract_common_info(post)
             if item == None:
                 continue   
             item["post"] = "jobs"
             self.extract_info_for_jobs(post, item)
+            if not self.jobs_reach_last:
+                self.jobs_reach_last = self.has_reached_lasttime(item)
             yield item
-        
-        if self.reach_last is False and self.page_number < self.page_range:
-            self.page_number += 1
-            url = self.url_frame[0]+str(self.page_number)+self.url_frame[1]
+        # generate next page 
+        if self.jobs_reach_last is False and self.jobs_page_number < self.page_range:
+            self.jobs_page_number += 1
+            url = url_frame[0]+str(self.jobs_page_number)+url_frame[1]
             yield scrapy.Request(url=url, callback=self.parse_for_jobs_post)
 
-    def parse_for_interview_post(self, post):
-        pass
+    def parse_for_interviews_post(self, response):
+        self.logger.debug('Currently parsing interviews page, page number is %d', self.interviews_page_number)
+        url_frame = ['https://www.1point3acres.com/bbs/forum-145-', '.html']
+
+        for post in response.css(self.path_to_post[0]).xpath(self.path_to_post[1]):
+            item = self.extract_common_info(post)
+            if item == None:
+                continue   
+            item["post"] = "interviews"
+            self.extract_infor_for_interviews(post, item)
+            if not self.interviews_reach_last:
+                self.interviews_reach_last = self.has_reached_lasttime(item)
+            yield item
+
+        if self.interviews_reach_last is False and self.interviews_page_number < self.page_range:
+            self.interviews_page_number += 1
+            url = url_frame[0]+str(self.interviews_page_number)+url_frame[1]
+            yield scrapy.Request(url=url, callback=self.parse_for_interviews_post)
 
     def extract_common_info(self, post):
         """
@@ -107,9 +130,7 @@ class Spider1point3(scrapy.Spider):
         # may anonymous author
         if len(by) > 1:
             item["author"] = by[0]            
-        #self.logger.info("Get item \n %s", item)
-        if not self.reach_last:
-            self.reach_last = self.has_reached_lasttime(item)
+
         return item
 
     def extract_info_for_jobs(self, post, item):
@@ -141,7 +162,7 @@ class Spider1point3(scrapy.Spider):
         path_to_position = 'span b font[color="#00B2E8"]::text'
         item["position"] = th.css(path_to_position).get()
         # get apply method
-        for s in th.css('span:text()').getall():
+        for s in th.css('span::text').getall():
             if len(s) > 6 and s[:3] == ' - ' and s[-3:] == ' - ':
                 item["apply_method"] = s[3:-3]
                 break
@@ -201,46 +222,3 @@ class Spider1point3(scrapy.Spider):
             pass
         
         return False
-
-
-
-    def extract_info(self, post):
-        # new reply post vs no-new-reply post
-        path_to_th = ['th.new', 'th.common']
-        path_to_title = 'a.s::text'
-        path_to_company = 'span span u b font::text'
-        path_to_time = 'td.by em span::text'
-        path_to_author = 'td.by cite a::text'
-        
-        item = Crawler1Point3Item()
-        th = post.css(path_to_th[0])
-        if th == []:
-            th = post.css(path_to_th[1])
-        if th == []:
-            return None
-
-        # get company at index 1 e.g: [ full-time, Google]
-        job_company = th.css(path_to_company).getall()
-        # get post title
-        title = th.css(path_to_title).get()
-        # get create time at index 0
-        time = post.css(path_to_time).getall()
-        # get author (0) and newest replier (1)
-        by = post.css(path_to_author).getall()
-        # may not have company
-        if len(job_company) > 1:
-            item["company"] = job_company[1]
-
-        item["title"] = title
-        item["create_date"] =  self.get_create_date(time[0])
-        if len(time) > 1:
-            item['last_reply_date'] = self.get_create_date(time[1])
-        else:
-            item['last_reply_date'] = self.get_create_date(post.css('td.by em a::text').get())
-        # may anonymous author
-        if len(by) > 1:
-            item["author"] = by[0]            
-        #self.logger.info("Get item \n %s", item)
-        if not self.reach_last:
-            self.reach_last = self.has_reached_lasttime(item)
-        return item

@@ -54,36 +54,18 @@ class Crawler1Point3Pipeline:
         self.client.close()
 
     def process_item(self, item, spider):
-        """
-        given an item of post, this function:
-        1. for each post, get rid of 'last_reply_date' key to see if this post has been stored before
-        2. update/insert the post
-        """
-        adapter = ItemAdapter(item)
-        post = adapter.asdict()
-        # get rid of ‘last_reply_date’ key
-        last_reply_date = ''
-        if 'last_reply_date' in post:
-            last_reply_date = post['last_reply_date']
-            post.pop('last_reply_date')
-        db_collection = self.db[self.collection_name]
-        #logging.debug("search for post: \n %s", post)
-        # if this post is new, insert the origin post
-        if db_collection.count_documents(post) == 0:
-            logging.debug("Insert a new item")
-            db_collection.insert_one(adapter.asdict())
-        # this post has been stored before, update 
-        else:
-            if last_reply_date != '':
-                logging.debug("Updating an item %s", last_reply_date)
-                db_collection.update_one(post, { "$set": { "last_reply_date": last_reply_date } })
-        
+        if item['post'] == 'jobs':
+            self.process_item_helper(item, "jobs")
+        elif item['post'] == 'interviews':
+            self.process_item_helper(item, "interviews")
         return item
 
-    def process_item_helper(self, adapter, collection_name):
+    def process_item_helper(self, item, collection_name):
         """
-
+            1. for each post, get rid of 'last_reply_date' key to see if this post has been stored before
+            2. update/insert the post
         """
+        adapter = ItemAdapter(item)
         post = adapter.asdict()
         # get rid of ‘last_reply_date’ key
         last_reply_date = ''
@@ -99,7 +81,7 @@ class Crawler1Point3Pipeline:
         # this post has been stored before, update 
         else:
             if last_reply_date != '':
-                logging.debug("Updating an item %s", last_reply_date)
+                logging.debug("Updating an item with last_reply_date %s", last_reply_date)
                 db_collection.update_one(post, { "$set": { "last_reply_date": last_reply_date } })
 
     def write_markdown(self, f, dic):
@@ -129,7 +111,8 @@ class Crawler1Point3Pipeline:
         create forms according to the data in database
         """
         f = open('data.md', 'w')
-        db_collection = self.db[self.collection_name]
+        collection_name = "jobs"
+        db_collection = self.db[collection_name]
         for delta in range(0, self.date_range+1):
             date = (self.today - datetime.timedelta(days=delta)).strftime('%Y-%m-%d')
             s = "## Date: "+ date + '\n'
