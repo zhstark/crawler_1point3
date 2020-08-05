@@ -80,6 +80,28 @@ class Crawler1Point3Pipeline:
         
         return item
 
+    def process_item_helper(self, adapter, collection_name):
+        """
+
+        """
+        post = adapter.asdict()
+        # get rid of ‘last_reply_date’ key
+        last_reply_date = ''
+        if 'last_reply_date' in post:
+            last_reply_date = post['last_reply_date']
+            post.pop('last_reply_date')
+        db_collection = self.db[collection_name]
+        #logging.debug("search for post: \n %s", post)
+        # if this post is new, insert the origin post
+        if db_collection.count_documents(post) == 0:
+            logging.debug("Insert a new item")
+            db_collection.insert_one(adapter.asdict())
+        # this post has been stored before, update 
+        else:
+            if last_reply_date != '':
+                logging.debug("Updating an item %s", last_reply_date)
+                db_collection.update_one(post, { "$set": { "last_reply_date": last_reply_date } })
+
     def write_markdown(self, f, dic):
         """
         :param f: the file that you want to write
