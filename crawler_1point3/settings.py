@@ -18,7 +18,7 @@ MONGO_URI = 'mongodb://localhost:27017/'
 MONGO_DATABASE = 'cralwer_1point3'
 
 # how many pages will scrape
-PAGE_RANGE = 10
+PAGE_RANGE = 100
 
 # the time range of posts need to be scraped, unit: day
 DATE_RANGE = 7

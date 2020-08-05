@@ -16,7 +16,7 @@ import logging
 
 class Crawler1Point3Pipeline:
     
-    collection_name = 'posts'
+    collection_name = 'jobs' #求职贴
 
     # used for local test
     company_list = {"Apple": 0, "Facebook": 0, "Google": 0}

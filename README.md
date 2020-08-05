@@ -10,11 +10,17 @@
 
 ## 使用说明
 
+在 [setting.py](crawler_1point3/settings.py) 中设置数据库相关配置及最多爬多少页。（这里不用担心设置页数范围太大，如果爬虫发现自己爬到了上次已经爬过的帖子时自动停止）
+
 运行：
 
 ```
 $ scrapy crawl Spider1point3 --logfile ./spider.log
 ```
+
+所有数据会写入数据库。可用 crawler_1point3_web 网页展示，若只想本地看统计数据的话可以在 [pipeline.py](crawler_1point3/pipelines.py) 中取消 `# self.create_forms_by_db()` 注释，在 `company_list` 中添加想要看到的公司名，其会在本地创建一个 markdown 文件，统计数据将以 markdown 表格的形式展示。
+
+目前只会爬求职栏，之后会加面经栏
 
 ## 数据库
 
