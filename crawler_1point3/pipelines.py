@@ -16,13 +16,11 @@ import logging
 
 class Crawler1Point3Pipeline:
     
-    collection_name = 'jobs' #求职贴
-
     # used for local test
     company_list = {"Apple": 0, "Facebook": 0, "Google": 0}
 
-    def __init__(self, mongo_uri="", mongo_db="", date_range=""):
-        self.mongo_uri = mongo_uri
+    def __init__(self, mongo_url="", mongo_db="", date_range=""):
+        self.mongo_url = mongo_url
         self.mongo_db = mongo_db
         self.date_range = date_range
         self.today = datetime.datetime.today()
@@ -30,7 +28,7 @@ class Crawler1Point3Pipeline:
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_url=crawler.settings.get('MONGO_URL'),
             mongo_db=crawler.settings.get('MONGO_DATABASE', 'items'),
             date_range=crawler.settings.get('DATE_RANGE', 10)
         )
@@ -39,7 +37,7 @@ class Crawler1Point3Pipeline:
         """
         when a spider begins to work, open a file to write the scraped data and get the current time.
         """
-        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.client = pymongo.MongoClient(self.mongo_url)
         self.db = self.client[self.mongo_db]
 
     def close_spider(self, spider):

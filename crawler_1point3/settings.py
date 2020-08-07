@@ -13,12 +13,12 @@ SPIDER_MODULES = ['crawler_1point3.spiders']
 NEWSPIDER_MODULE = 'crawler_1point3.spiders'
 
 # MongoDB url
-MONGO_URI = 'mongodb://localhost:27017/'
+MONGO_URL = 'mongodb://localhost:27017/'
 # MongoDB database
-MONGO_DATABASE = 'cralwer_1point3'
+MONGO_DATABASE = 'crawler_1point3'
 
 # how many pages will scrape
-PAGE_RANGE = 50
+PAGE_RANGE = 200
 
 # the time range of posts need to be scraped, unit: day
 DATE_RANGE = 7
