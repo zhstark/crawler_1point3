@@ -10,7 +10,7 @@
 2. 一亩三分地“[面经](https://www.1point3acres.com/bbs/forum-145-1.html)” ，可统计公司招聘热度
 3. LeetCode [Interview Questions](https://leetcode.com/discuss/interview-question?currentPage=1&orderBy=newest_to_oldest&query=)
 
-爬虫只将帖子数据写入数据可，可参考 crawler_1point3_web 进行网页展示，若只想本地看统计数据的话可以在 [pipeline.py](crawler_1point3/pipelines.py) 中取消 `# self.create_forms_by_db()` 注释，在 `company_list` 中添加想要看到的公司名，其会在本地创建一个 markdown 文件，统计数据将以 markdown 表格的形式展示。
+爬虫只将帖子数据写入数据，可参考 crawler_web 进行网页展示，若只想本地看统计数据的话可以在 [pipeline.py](crawler_1point3/pipelines.py) 中取消 `# self.create_forms_by_db()` 注释，在 `company_list` 中添加想要看到的公司名，其会在本地创建一个 markdown 文件，统计数据将以 markdown 表格的形式展示。
 
 由于一亩三分地的帖子是按照回复时间排序的，而 LeetCode 可以按照发帖顺序排序，所以两个爬虫在 判断是否达到上次爬过的内容 上有所不同。
 
