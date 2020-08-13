@@ -35,7 +35,6 @@ class Crawler1Point3Pipeline:
 
     def open_spider(self, spider):
         """
-        when a spider begins to work, open a file to write the scraped data and get the current time.
         """
         self.client = pymongo.MongoClient(self.mongo_url)
         self.db = self.client[self.mongo_db]

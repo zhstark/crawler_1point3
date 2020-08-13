@@ -9,4 +9,9 @@ import scrapy
 class CrawlerLeetcodeItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    title = scrapy.Field()
+    company = scrapy.Field()
+    author = scrapy.Field()
+    create_date = scrapy.Field()
+    # last_reply_date = scrapy.Field()
+    tags = scrapy.Field()

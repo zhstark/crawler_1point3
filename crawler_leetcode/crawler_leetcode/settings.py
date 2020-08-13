@@ -12,12 +12,19 @@ BOT_NAME = 'crawler_leetcode'
 SPIDER_MODULES = ['crawler_leetcode.spiders']
 NEWSPIDER_MODULE = 'crawler_leetcode.spiders'
 
+# MongoDB url
+MONGO_URL = 'mongodb://localhost:27017/'
+# MongoDB database
+MONGO_DATABASE = 'crawler_leetcode'
+
+# how many pages will scrape
+PAGE_RANGE = 200
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawler_leetcode (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -31,7 +38,7 @@ ROBOTSTXT_OBEY = True
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -62,9 +69,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'crawler_leetcode.pipelines.CrawlerLeetcodePipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'crawler_leetcode.pipelines.CrawlerLeetcodePipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
