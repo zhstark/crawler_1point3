@@ -105,6 +105,7 @@ class LeetcodeSpider(scrapy.Spider):
         # 2. find from tag
         li = node['title'].split()
         for com in li:
+            com = com.capitalize()
             if com in self.companies:
                 item['company'] = com
                 break

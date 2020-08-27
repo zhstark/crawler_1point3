@@ -59,7 +59,7 @@ li = [
     'Medallia',
     'Spokeo',
     'NetApp',
-    'Red Hat',
+    'RedHat',
     'Appfolio',
     'IXL',
     'Cerner',
@@ -100,8 +100,6 @@ li = [
 def get_companies():
     companies = set()
     for c in li:
-        companies.add(c.lower())
-        companies.add(c)
         companies.add(c.capitalize())
 
     return companies
