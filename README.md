@@ -18,7 +18,7 @@
 
 ## Prerequisite
 
-安装 python 包： 
+安装 python 包 (*python3*)： 
 - scrapy
 - pymongo
 
