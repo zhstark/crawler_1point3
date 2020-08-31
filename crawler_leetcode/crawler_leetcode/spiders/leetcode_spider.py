@@ -76,7 +76,7 @@ class LeetcodeSpider(scrapy.Spider):
                 self.logger.debug("Meet an old post")
             yield item
         
-        if self.reach_last_date_counter < 3 and self.page < self.page_range:
+        if self.reach_last_date_counter < 20 and self.page < self.page_range:
             self.page += 1
             payload = self.payload_frame[0]+str(15*(self.page-1))+self.payload_frame[1]
             yield scrapy.Request(url=self.url, callback=self.parse, method="POST", body=payload, headers=self.headers)
