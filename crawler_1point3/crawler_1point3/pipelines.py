@@ -2,6 +2,7 @@
 # All posts are delivered to this pipeline as items.
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+# -*- coding: utf-8 -*-
 
 
 # useful for handling different item types with a single interface
