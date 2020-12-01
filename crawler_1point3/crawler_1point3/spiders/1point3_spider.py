@@ -15,7 +15,7 @@ class Spider1point3(scrapy.Spider):
     jobs_page_number = 1
     interviews_page_number = 1
 
-    def __init__(self, mongo_uri='mongodb://localhost:27017/', mongo_db='cralwer_1point3', page_range=10):
+    def __init__(self, mongo_uri='mongodb://127.0.0.1:27017/', mongo_db='cralwer_1point3', page_range=10):
         """
             access the database to get the last work date from collection 'spider_work_date', if no such collection, default 10 years ago.
         """
