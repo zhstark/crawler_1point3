@@ -15,12 +15,12 @@ class Spider1point3(scrapy.Spider):
     jobs_page_number = 1
     interviews_page_number = 1
 
-    def __init__(self, mongo_uri='mongodb://127.0.0.1:27017/', mongo_db='cralwer_1point3', page_range=10):
+    def __init__(self, mongo_url='mongodb://127.0.0.1:27017/', mongo_db='cralwer_1point3', page_range=10):
         """
             access the database to get the last work date from collection 'spider_work_date', if no such collection, default 10 years ago.
         """
         self.page_range = page_range
-        client = pymongo.MongoClient(mongo_uri)
+        client = pymongo.MongoClient(mongo_url)
         db = client[mongo_db]
         # default ending date: 10 years ago
         self.last_date = (datetime.datetime.today() - datetime.timedelta(days=10*365)).strftime('%Y-%m-%d')
@@ -38,10 +38,10 @@ class Spider1point3(scrapy.Spider):
             get setting configuration
             return to instance initialization
         """
-        mongo_uri=crawler.settings.get('MONGO_URI')
+        mongo_url=crawler.settings.get('MONGO_URL')
         mongo_db=crawler.settings.get('MONGO_DATABASE', 'cralwer_1point3')
         page_range = crawler.settings.get('PAGE_RANGE', 10)
-        return cls(mongo_uri, mongo_db, page_range)
+        return cls(mongo_url, mongo_db, page_range)
 
     def start_requests(self):
         jobs_url = "https://www.1point3acres.com/bbs/forum-28-1.html"

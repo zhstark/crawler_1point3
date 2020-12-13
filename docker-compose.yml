@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  mymongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+
+  myapp:
+    image: crawler:0.9
+    command: >
+      bash -c "python crawler_1point3/crawler_1point3/wait_for_mongo.py && python run.py"
+    ports:
+      - "5000:5000"
+    links:
+      - mymongo
+    depends_on:
+      - mymongo
+
+  myweb:
+    image: crawler-web:0.2
+    ports:
+      - "8080:8080"
+    links:
+      - mymongo
+    depends_on:
+      - mymongo
+    environment:
+      - MONGO_URL=mongodb://mymongo:27017/

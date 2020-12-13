@@ -20,13 +20,13 @@ class LeetcodeSpider(scrapy.Spider):
     reach_last_date_counter = 0
     page = 1
 
-    def __init__(self, mongo_uri='mongodb://127.0.0.1:27017/', mongo_db='cralwer_1point3', page_range=10):
+    def __init__(self, mongo_url='mongodb://127.0.0.1:27017/', mongo_db='cralwer_1point3', page_range=10):
         """
             access the database to get the last work date from collection 'spider_work_date', 
             if no such collection, default 10 years ago.
         """
         self.page_range = page_range
-        self.client = pymongo.MongoClient(mongo_uri)
+        self.client = pymongo.MongoClient(mongo_url)
         self.db = self.client[mongo_db]
 
     @classmethod
@@ -35,10 +35,10 @@ class LeetcodeSpider(scrapy.Spider):
             get setting configuration
             return to instance initialization
         """
-        mongo_uri=crawler.settings.get('MONGO_URI', 'mongodb://127.0.0.1:27017/')
+        mongo_url=crawler.settings.get('MONGO_URL', 'mongodb://127.0.0.1:27017/')
         mongo_db=crawler.settings.get('MONGO_DATABASE', 'cralwer_leetcode')
         page_range = crawler.settings.get('PAGE_RANGE', 10)
-        return cls(mongo_uri, mongo_db, page_range)
+        return cls(mongo_url, mongo_db, page_range)
 
     def  __del__(self):
         self.client.close()
