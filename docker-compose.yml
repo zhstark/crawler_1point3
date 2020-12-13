@@ -3,11 +3,13 @@ version: '3'
 services:
   mymongo:
     image: mongo
+    restart: always
     ports:
       - "27017:27017"
 
   myapp:
     image: crawler:0.9
+    restart: always
     command: >
       bash -c "python crawler_1point3/crawler_1point3/wait_for_mongo.py && python run.py"
     ports:
@@ -19,6 +21,7 @@ services:
 
   myweb:
     image: crawler-web:0.2
+    restart: always
     ports:
       - "8080:8080"
     links:
